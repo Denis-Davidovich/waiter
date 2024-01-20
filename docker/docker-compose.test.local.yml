@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  unit:
+    env_file:
+      - ./../.env.test.local
+    environment:
+      APP_ENV: test
+      VIRTUAL_HOST: ${APP_HOST}
+      XDEBUG_SESSION: 1
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: >-
+        client_host=host.docker.internal
+        client_port=9003
+        start_with_request=yes
+        idekey=PHPSTORM
+      PHP_IDE_CONFIG: serverName=${APP_NAME}
+      COMPOSER_MEMORY_LIMIT: "-1"
+      OPCACHE_ENABLE: 0
+    ports:
+      - "8090:80"
+    volumes:
+      - ./..:/app:rw,cached
+      - ./../.data/log/app:/app/var/log
+
+  mysql:
+    ports:
+      - "13309:3306"
+
+  redis:
+    ports:
+      - "6385:6379"

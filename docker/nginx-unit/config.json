@@ -1,0 +1,63 @@
+{
+  "listeners": {
+    "*:80": {
+      "pass": "routes"
+    }
+  },
+  "routes": [
+    {
+      "match": {
+        "uri": [
+          "/bundles*",
+          "/uploads*",
+          "/images*",
+          "/admin/css*",
+          "/admin/js*",
+          "/favicon.svg",
+          "~\\.ico$"
+        ]
+      },
+      "action": {
+        "share": "/app/public$uri",
+        "fallback": {
+          "pass": "applications/admin"
+        }
+      }
+    },
+    {
+      "match": {
+        "uri": [
+          "/admin*",
+          "/adm*"
+        ]
+      },
+      "action": {
+        "pass": "applications/admin"
+      }
+    },
+    {
+      "action": {
+        "pass": "applications/api"
+      }
+    }
+  ],
+  "applications": {
+    "api": {
+      "type": "php",
+      "user": "www-data",
+      "group": "www-data",
+      "root": "/app/public",
+      "script": "index.php"
+    },
+    "admin": {
+      "type": "php",
+      "user": "www-data",
+      "group": "www-data",
+      "root": "/app/public",
+      "script": "index.php",
+      "environment": {
+        "ADMIN": "admin"
+      }
+    }
+  }
+}

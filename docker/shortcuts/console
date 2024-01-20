@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+docker-compose run \
+    --volume $PWD:/app --entrypoint "/docker-entrypoint.sh" \
+    --user $(id -u) --no-deps --rm \
+    unit bin/console $@

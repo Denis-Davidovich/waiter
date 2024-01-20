@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  unit:
+    image: ${REGISTRY_URL}${REPOSITORY_NAME}unit:${DOCKER_TAG}
+    build:
+      context: './../'
+      dockerfile: 'docker/nginx-unit/Dockerfile'
+      target: ${TARGET}
+    environment:
+      OPCACHE_ENABLE: 1
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
+
+  redis:
+    image: redis:7
+    command:
+      - --requirepass ${REDIS_PASSWORD}

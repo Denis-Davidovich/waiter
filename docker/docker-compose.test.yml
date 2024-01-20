@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  unit:
+    build:
+      target: ${TARGET}
+    env_file:
+      - ./../.env.test
+    environment:
+      APP_ENV: test
+      OPCACHE_ENABLE: 0
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    external_links:
+      - unit:front

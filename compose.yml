@@ -1,0 +1,130 @@
+name: waiter
+services:
+  maildev:
+    image: djfarrelly/maildev
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "1080"
+        protocol: tcp
+      - mode: ingress
+        target: 25
+        published: "25"
+        protocol: tcp
+  mysql:
+    environment:
+      MYSQL_ROOT_PASSWORD: waiter
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /usr/bin/mysql --user=root --password=waiter --execute "SHOW DATABASES;"
+    image: mysql:8.0
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 3306
+        published: "13306"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /Users/dzianis.davidovich/projects/dev.lab/waiter/.data/db/mysql
+        target: /var/lib/mysql
+        bind:
+          create_host_path: true
+  redis:
+    command:
+      - --requirepass redis
+    image: redis:7
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 6379
+        published: "6379"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /Users/dzianis.davidovich/projects/dev.lab/waiter/.data/db/redis
+        target: /data
+        bind:
+          create_host_path: true
+  unit:
+    build:
+      context: /Users/dzianis.davidovich/projects/dev.lab/waiter
+      dockerfile: docker/nginx-unit/Dockerfile
+      target: dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: true
+      redis:
+        condition: service_started
+        required: true
+    environment:
+      APP_DEBUG: "false"
+      APP_ENV: dev
+      APP_HOST: waiter.docker
+      APP_NAME: waiter
+      APP_SECRET: f75c6171131d4d3bbf22e90e80bb62b1
+      COMPOSE_FILE: docker/docker-compose.yml:docker/docker-compose.dev.yml:docker/docker-compose.local.yml
+      COMPOSE_PROJECT_NAME: waiter
+      COMPOSER_MEMORY_LIMIT: "-1"
+      DATABASE_URL: mysql://root:waiter@mysql:3306/waiter?serverVersion=8
+      DB_HOST: mysql
+      DB_NAME: waiter
+      DB_PASSWORD: waiter
+      DB_PORT: "3306"
+      DB_USER: waiter
+      DOCKER_TAG: master
+      LOCK_DSN: flock
+      MAILER_ADDRESS_FROM: notify@waiter.docker
+      MAILER_NAME_FROM: waiter notification
+      MAILER_RECIPIENTS: '[]'
+      MAILER_URL: null://localhost
+      OPCACHE_ENABLE: "0"
+      PHP_IDE_CONFIG: serverName=waiter
+      REDIS_LOG_URL: redis://redis@redis/0
+      REDIS_PASSWORD: redis
+      REDIS_PROMETHEUS_URL: redis://redis@redis/0
+      REDIS_URL: redis://redis@redis/0
+      REGISTRY_URL: registry.git.herewetest.com/
+      REPOSITORY_NAME: platforms_services/waiter/
+      SENTRY_DSN: ""
+      SENTRY_ENV: dev
+      TARGET: dev
+      VIRTUAL_HOST: okta.local,waiter.docker
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003 start_with_request=yes idekey=PHPSTORM
+      XDEBUG_MODE: debug
+      XDEBUG_SESSION: "1"
+    external_links:
+      - unit:front
+    image: registry.git.herewetest.com/platforms_services/waiter/unit:master
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "8080"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /Users/dzianis.davidovich/projects/dev.lab/waiter
+        target: /app
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /Users/dzianis.davidovich/projects/dev.lab/waiter/.data/.composer
+        target: /root/.composer
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /Users/dzianis.davidovich/.ssh/id_rsa
+        target: /root/.ssh/id_rsa
+        bind:
+          create_host_path: true
+networks:
+  default:
+    name: waiter_default

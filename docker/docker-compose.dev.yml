@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  unit:
+    build:
+      target: dev
+    environment:
+      XDEBUG_MODE: 'off'
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    external_links:
+      - unit:front
+
+  maildev:
+    image: djfarrelly/maildev

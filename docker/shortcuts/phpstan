@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+#docker build -t phpstan/phpstan:apalon docker/phpstan
+docker run \
+    -v $PWD:/app \
+    --rm phpstan:apalon-8.1 phpstan analyse $@
