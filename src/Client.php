@@ -2,13 +2,15 @@
 
 class Client
 {
-    public function req($message)
+    private string $key;
+
+    public function req($message): void
     {
         $client = new \GuzzleHttp\Client();
         $client->post('https://api.openai.com/v1/chat/completions', [
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer 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'
+                'Authorization' => 'Bearer ' . $this->key
             ],
             'body' => [
                 "model" => "gpt-4",
